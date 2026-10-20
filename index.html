@@ -1,0 +1,150 @@
+<!doctype html>
+<html lang="de">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#0b1730">
+  <meta name="description" content="Finde den zuständigen Stromnetzbetreiber anhand einer deutschen Adresse oder Postleitzahl.">
+  <title>NetzFinder — Netzbetreiber finden</title>
+  <style>
+    :root{--navy:#0b1730;--blue:#2563eb;--mint:#b9f5d0;--ink:#172033;--muted:#64748b;--line:#e5eaf2;--bg:#f5f7fb}
+    *{box-sizing:border-box} body{margin:0;font-family:Inter,ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;color:var(--ink);background:var(--bg)}
+    a{color:inherit} .wrap{max-width:1120px;margin:auto;padding:0 24px}
+    header{background:var(--navy);color:white;border-bottom:1px solid #24314c}
+    nav{height:76px;display:flex;align-items:center;justify-content:space-between;gap:20px}
+    .brand{display:flex;align-items:center;gap:11px;font-size:20px;font-weight:800;letter-spacing:-.5px}
+    .logo{width:38px;height:38px;border-radius:12px;background:var(--mint);display:grid;place-items:center;color:var(--navy);font-weight:900;font-size:20px}
+    .navnote{font-size:13px;color:#cbd5e1}
+    .hero{background:radial-gradient(ellipse at 80% 0%,#1e3a70 0,transparent 38%),var(--navy);color:white;padding:68px 0 76px}
+    .hero-grid{display:grid;grid-template-columns:1.05fr .95fr;gap:46px;align-items:center}
+    .eyebrow{display:inline-flex;gap:8px;align-items:center;color:var(--mint);font-weight:700;font-size:12px;letter-spacing:1.4px;text-transform:uppercase}
+    h1{font-size:clamp(36px,5vw,58px);line-height:1.05;letter-spacing:-2px;margin:20px 0 18px;max-width:640px}
+    .hero p{font-size:17px;line-height:1.7;color:#d2dbea;max-width:570px;margin:0}
+    .search-card{background:white;color:var(--ink);padding:28px;border-radius:22px;box-shadow:0 24px 70px #0004}
+    .search-card h2{font-size:21px;margin:0 0 8px;letter-spacing:-.5px}
+    .hint{color:var(--muted);font-size:13px;line-height:1.5;margin:0 0 20px}
+    label{display:block;font-size:13px;font-weight:750;margin-bottom:8px}
+    input{width:100%;border:1px solid #cfd7e5;border-radius:12px;padding:15px 14px;font-size:15px;outline:none;background:#fff}
+    input:focus{border-color:var(--blue);box-shadow:0 0 0 3px #2563eb1c}
+    .btn{border:0;border-radius:12px;padding:15px 18px;background:var(--blue);color:white;font-weight:750;font-size:15px;cursor:pointer;width:100%;margin-top:12px;transition:.15s}
+    .btn:hover{background:#1d4ed8;transform:translateY(-1px)} .btn:disabled{opacity:.6;cursor:wait;transform:none}
+    .status{display:none;margin-top:16px;padding:14px;border-radius:12px;font-size:14px;line-height:1.55}
+    .status.show{display:block}.status.info{background:#eff6ff;color:#1e40af}.status.error{background:#fff1f2;color:#9f1239}.status.success{background:#ecfdf5;color:#065f46}
+    .result-actions{display:none;gap:10px;flex-wrap:wrap;margin-top:12px}.result-actions.show{display:flex}
+    .result-actions a{display:inline-flex;text-decoration:none;border:1px solid #d8e0ec;border-radius:10px;padding:11px 12px;font-size:13px;font-weight:750;background:#fff}
+    .result-actions a.primary{background:var(--navy);color:white;border-color:var(--navy)}
+    .metrics{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-top:25px}
+    .metric{border:1px solid #e3e8f1;border-radius:14px;padding:16px;background:#fff}.metric strong{display:block;font-size:14px}.metric span{font-size:12px;color:var(--muted)}
+    main{padding:54px 0 70px}.section-title{text-align:center;font-size:30px;letter-spacing:-1px;margin:0 0 10px}.section-sub{text-align:center;color:var(--muted);margin:0 auto 30px;max-width:620px;line-height:1.6}
+    .steps{display:grid;grid-template-columns:repeat(3,1fr);gap:18px}.step{background:#fff;border:1px solid var(--line);padding:24px;border-radius:18px}.num{width:34px;height:34px;border-radius:10px;background:#eaf1ff;color:#1d4ed8;display:grid;place-items:center;font-weight:850}.step h3{font-size:17px;margin:17px 0 8px}.step p{font-size:14px;color:var(--muted);line-height:1.65;margin:0}
+    .notice{margin-top:26px;background:#fff8e7;border:1px solid #f5df9b;border-radius:14px;padding:18px 20px;color:#704d00;font-size:13px;line-height:1.65}
+    footer{background:#0b1730;color:#cbd5e1;padding:25px 0;font-size:12px;line-height:1.7}footer .foot{display:flex;justify-content:space-between;gap:20px;flex-wrap:wrap}
+    @media(max-width:800px){.hero-grid{grid-template-columns:1fr;gap:32px}.hero{padding:48px 0}.steps{grid-template-columns:1fr}.metrics{grid-template-columns:1fr}.navnote{display:none}.search-card{padding:22px}h1{letter-spacing:-1.5px}}
+  </style>
+</head>
+<body>
+<header><div class="wrap"><nav><div class="brand"><div class="logo">N</div>NetzFinder</div><div class="navnote">Deutschland · Stromnetzbetreiber-Suche</div></nav></div></header>
+<section class="hero">
+  <div class="wrap hero-grid">
+    <div>
+      <div class="eyebrow">● Für PV & Netzanmeldung</div>
+      <h1>Finde den passenden Netzbetreiber.</h1>
+      <p>Gib eine Adresse in Deutschland ein. NetzFinder ermittelt die Postleitzahl und führt dich zur kostenlosen Netzbetreiber-Suche, damit du den zuständigen Stromnetzbetreiber prüfen kannst.</p>
+      <div class="metrics">
+        <div class="metric"><strong>Adresssuche</strong><span>Straße, Hausnummer, Ort</span></div>
+        <div class="metric"><strong>PLZ-Ermittlung</strong><span>Automatisch per Geocoding</span></div>
+        <div class="metric"><strong>Kostenlos</strong><span>Keine Anmeldung nötig</span></div>
+      </div>
+    </div>
+    <div class="search-card">
+      <h2>Netzbetreiber finden</h2>
+      <p class="hint">Bitte vollständige Adresse oder Postleitzahl eingeben. Die Suche ist für Deutschland ausgelegt.</p>
+      <form id="searchForm">
+        <label for="address">Adresse oder Postleitzahl</label>
+        <input id="address" name="address" autocomplete="street-address" placeholder="z. B. Königsallee 1, 40212 Düsseldorf" required>
+        <button class="btn" id="submitBtn" type="submit">Adresse prüfen →</button>
+      </form>
+      <div id="status" class="status" role="status" aria-live="polite"></div>
+      <div id="actions" class="result-actions">
+        <a id="emaLink" class="primary" href="https://ema-energiewelt.de/netzbetreiber" target="_blank" rel="noopener">Stromnetzbetreiber prüfen ↗</a>
+        <a id="vnbLink" href="https://www.vnbdigital.de/" target="_blank" rel="noopener">VNBdigital öffnen ↗</a>
+        <a id="mapLink" href="#" target="_blank" rel="noopener">Adresse auf Karte ↗</a>
+      </div>
+    </div>
+  </div>
+</section>
+<main><div class="wrap">
+  <h2 class="section-title">So funktioniert’s</h2>
+  <p class="section-sub">Die Adresssuche hilft dir, die richtige Postleitzahl zu finden. Anschließend kannst du die Zuordnung im Netzbetreiber-Finder überprüfen.</p>
+  <div class="steps">
+    <article class="step"><div class="num">1</div><h3>Adresse eingeben</h3><p>Trage Straße, Hausnummer und Ort ein. Alternativ reicht eine deutsche Postleitzahl.</p></article>
+    <article class="step"><div class="num">2</div><h3>Postleitzahl ermitteln</h3><p>Bei einer Adresse wird die PLZ über OpenStreetMap/Nominatim gesucht. Bitte das Ergebnis vor der Weiterleitung prüfen.</p></article>
+    <article class="step"><div class="num">3</div><h3>Netzbetreiber verifizieren</h3><p>Öffne den kostenlosen Finder und suche mit der ermittelten PLZ. Bei Grenzgebieten bitte mit Stromrechnung oder Netzbetreiber gegenprüfen.</p></article>
+  </div>
+  <div class="notice"><strong>Wichtiger Hinweis:</strong> Diese kostenlose GitHub-Pages-Version ermittelt die Postleitzahl, sie enthält keine eigene vollständige Datenbank aller deutschen Netzgebiete. Die öffentliche Zuordnung ist oft gemeinde-/PLZ-basiert und nicht in jedem Fall hausnummerngenau. Das angezeigte Ergebnis des externen Finders ist daher zu prüfen; für eine verbindliche Zuordnung bitte Stromrechnung oder Netzbetreiber verwenden. Adresssuche wird über Nominatim (OpenStreetMap) ausgeführt.</div>
+</div></main>
+<footer><div class="wrap foot"><div>© <span id="year"></span> NetzFinder · Kostenloses Hilfswerkzeug</div><div>Geocoding: OpenStreetMap contributors · Netzbetreiber-Zuordnung: externer Finder</div></div></footer>
+<script>
+const form = document.getElementById('searchForm');
+const addressInput = document.getElementById('address');
+const button = document.getElementById('submitBtn');
+const statusBox = document.getElementById('status');
+const actions = document.getElementById('actions');
+document.getElementById('year').textContent = new Date().getFullYear();
+
+function showStatus(message, type) {
+  statusBox.textContent = message;
+  statusBox.className = 'status show ' + type;
+}
+function validGermanPostcode(value) {
+  const match = value.trim().match(/(?:^|\\s)(\\d{5})(?:\\s|$)/);
+  return match ? match[1] : null;
+}
+form.addEventListener('submit', async (event) => {
+  event.preventDefault();
+  const query = addressInput.value.trim();
+  if (!query) return;
+  actions.classList.remove('show');
+  button.disabled = true;
+  button.textContent = 'Suche läuft …';
+  try {
+    let postcode = validGermanPostcode(query);
+    let displayName = query;
+    let lat = null, lon = null;
+
+    if (!postcode || !/^\\d{5}$/.test(query)) {
+      const url = 'https://nominatim.openstreetmap.org/search?format=jsonv2&addressdetails=1&limit=5&countrycodes=de&q=' + encodeURIComponent(query);
+      const response = await fetch(url, {headers: {'Accept-Language':'de'}});
+      if (!response.ok) throw new Error('Adresssuche momentan nicht erreichbar. Bitte versuche es erneut.');
+      const results = await response.json();
+      if (!results.length) throw new Error('Adresse nicht gefunden. Bitte Straße, Hausnummer und Ort genauer eingeben.');
+      const result = results.find(x => x.address && x.address.postcode) || results[0];
+      postcode = (result.address && result.address.postcode || '').replace(/\\D/g,'').slice(0,5);
+      displayName = result.display_name || query;
+      lat = result.lat; lon = result.lon;
+      if (!/^\\d{5}$/.test(postcode)) throw new Error('Für diese Adresse konnte keine deutsche Postleitzahl ermittelt werden. Bitte PLZ direkt eingeben.');
+    }
+    // The EMA finder is an external public service; users can enter the derived postcode there.
+    document.getElementById('emaLink').href = 'https://ema-energiewelt.de/netzbetreiber';
+    document.getElementById('vnbLink').href = 'https://www.vnbdigital.de/';
+    const mapUrl = lat && lon
+      ? 'https://www.openstreetmap.org/?mlat=' + encodeURIComponent(lat) + '&mlon=' + encodeURIComponent(lon) + '#map=17/' + encodeURIComponent(lat) + '/' + encodeURIComponent(lon)
+      : 'https://www.openstreetmap.org/search?query=' + encodeURIComponent(query);
+    document.getElementById('mapLink').href = mapUrl;
+    showStatus('PLZ ermittelt: ' + postcode + '.\\nAdresse: ' + displayName + '\\nÖffne den Netzbetreiber-Finder und gib dort die PLZ ' + postcode + ' ein, um den zuständigen Stromnetzbetreiber zu prüfen.', 'success');
+    actions.classList.add('show');
+    document.getElementById('emaLink').textContent = 'Finder öffnen · PLZ ' + postcode + ' ↗';
+    document.getElementById('emaLink').onclick = () => {
+      // Copy postcode so it can be pasted into the external finder.
+      if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(postcode).catch(()=>{});
+    };
+  } catch (error) {
+    showStatus(error.message || 'Unbekannter Fehler. Bitte versuche es erneut.', 'error');
+  } finally {
+    button.disabled = false;
+    button.textContent = 'Adresse prüfen →';
+  }
+});
+</script>
+</body>
+</html>
