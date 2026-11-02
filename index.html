@@ -97,7 +97,7 @@ function showStatus(message, type) {
   statusBox.className = 'status show ' + type;
 }
 function validGermanPostcode(value) {
-  const match = value.trim().match(/(?:^|\\s)(\\d{5})(?:\\s|$)/);
+  const match = value.trim().match(/\b(\d{5})\b/);
   return match ? match[1] : null;
 }
 form.addEventListener('submit', async (event) => {
@@ -112,17 +112,39 @@ form.addEventListener('submit', async (event) => {
     let displayName = query;
     let lat = null, lon = null;
 
-    if (!postcode || !/^\\d{5}$/.test(query)) {
-      const url = 'https://nominatim.openstreetmap.org/search?format=jsonv2&addressdetails=1&limit=5&countrycodes=de&q=' + encodeURIComponent(query);
-      const response = await fetch(url, {headers: {'Accept-Language':'de'}});
+    if (!postcode || !/^\d{5}$/.test(query)) {
+      const searchUrl = 'https://nominatim.openstreetmap.org/search?format=jsonv2&addressdetails=1&limit=8&countrycodes=de&q=' + encodeURIComponent(query);
+      const response = await fetch(searchUrl, {headers: {'Accept-Language':'de'}});
       if (!response.ok) throw new Error('Adresssuche momentan nicht erreichbar. Bitte versuche es erneut.');
       const results = await response.json();
       if (!results.length) throw new Error('Adresse nicht gefunden. Bitte Straße, Hausnummer und Ort genauer eingeben.');
-      const result = results.find(x => x.address && x.address.postcode) || results[0];
-      postcode = (result.address && result.address.postcode || '').replace(/\\D/g,'').slice(0,5);
+
+      const result = results.find(x => /^\d{5}$/.test(String(x.address?.postcode || '').replace(/\D/g, '')))
+        || results.find(x => x.address && (x.address.city || x.address.town || x.address.village || x.address.municipality))
+        || results[0];
+
+      postcode = String(result.address?.postcode || '').replace(/\D/g, '').slice(0, 5);
       displayName = result.display_name || query;
-      lat = result.lat; lon = result.lon;
-      if (!/^\\d{5}$/.test(postcode)) throw new Error('Für diese Adresse konnte keine deutsche Postleitzahl ermittelt werden. Bitte PLZ direkt eingeben.');
+      lat = result.lat;
+      lon = result.lon;
+
+      if (!/^\d{5}$/.test(postcode) && lat && lon) {
+        const reverseUrl = 'https://nominatim.openstreetmap.org/reverse?format=jsonv2&addressdetails=1&zoom=18&lat='
+          + encodeURIComponent(lat) + '&lon=' + encodeURIComponent(lon);
+        const reverseResponse = await fetch(reverseUrl, {headers: {'Accept-Language':'de'}});
+        if (reverseResponse.ok) {
+          const reverseResult = await reverseResponse.json();
+          const reversePostcode = String(reverseResult.address?.postcode || '').replace(/\D/g, '').slice(0, 5);
+          if (/^\d{5}$/.test(reversePostcode)) {
+            postcode = reversePostcode;
+            displayName = reverseResult.display_name || displayName;
+          }
+        }
+      }
+
+      if (!/^\d{5}$/.test(postcode)) {
+        throw new Error('Die Adresse wurde gefunden, aber Nominatim hat keine PLZ geliefert. Bitte gib die fünfstellige PLZ direkt zusammen mit der Adresse ein, z. B. „Straße 1, 12345 Ort“.');
+      }
     }
     // The EMA finder is an external public service; users can enter the derived postcode there.
     document.getElementById('emaLink').href = 'https://ema-energiewelt.de/netzbetreiber';
